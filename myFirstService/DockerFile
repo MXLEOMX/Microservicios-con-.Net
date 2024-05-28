@@ -1,0 +1,21 @@
+# Establecer la imagen base para la fase de construcción
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copiar el archivo de proyecto y restaurar dependencias
+COPY myFirstService/myFirstService.csproj .
+RUN dotnet restore
+
+# Copiar el resto del código y construir el proyecto
+COPY . .
+RUN dotnet build "myFirstService.csproj" -c Release -o /app/build
+
+# Publicar el proyecto
+RUN dotnet publish "myFirstService.csproj" -c Release -o /app/publish
+
+# Establecer la imagen base para el contenedor de producción
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+
+# Copiar los archivos publicados desde la fase de construcción
+COPY --from
